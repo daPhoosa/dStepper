@@ -111,11 +111,12 @@ void uStepper::setSpeed(int32_t feedRate){  // pass in speed [MM/min]
       ditherLongSteps  = ditherTotalSteps - 1;  // only one short step
    }
    
+   // *** Debug Output ***
    //Serial.print(idealTickPerStep, 2); Serial.print("\t");
    //Serial.print(int(idealTickPerStep + 0.5f)); Serial.print("\t");
-   Serial.print(tickPerStep); Serial.print("\t");
-   //Serial.print(ditherTotalSteps - ditherLongSteps); Serial.print("\t");
-   //Serial.print(ditherLongSteps); Serial.print("\t");
+   //Serial.print(tickPerStep); Serial.print("\t");
+   //Serial.print(ditherTotalSteps - ditherLongSteps); Serial.print("\t");  // small steps
+   //Serial.print(ditherLongSteps); Serial.print("\t");                     // large steps
    //Serial.print(float(ditherLongSteps * (tickPerStep + 1) + (ditherTotalSteps - ditherLongSteps) * tickPerStep) / float(ditherTotalSteps), 2); Serial.print("\t");
    //Serial.print(maxFeedRate); Serial.print("\t");
 
