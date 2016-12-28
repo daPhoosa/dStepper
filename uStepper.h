@@ -29,11 +29,15 @@
          uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _stepPin, int _dirPin, int _enablePin);
          ~uStepper();
          
-         void setSpeed(int32_t feedRate);
+         void setSpeed(int feedRate);
          float positionFloat();
+         
          void setZero();
+         void setMinVelocity(float minVel);
+         
          void enable();
          void disable();
+         
          inline void step();  // call from ISR
 
 
@@ -49,8 +53,8 @@
          int FORWARD, REVERSE;
          
          int ditherTotalSteps, ditherLongSteps, ditherCounter;
-         
-         int32_t maxFeedRate;
+
+         int maxFeedRate, minFeedRate;
          
          volatile int32_t  position;
           

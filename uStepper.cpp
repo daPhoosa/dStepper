@@ -27,10 +27,11 @@ uStepper::uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _ste
    stepsPerMM = _stepsPerMM;        // [steps/mm]
    
    tickPerMin = _tickRateHz * 60.0f;
-   maxFeedRate = int32_t(tickPerMin * MMPerStep) / 8;
+   maxFeedRate = int(constrain((tickPerMin * MMPerStep) / 2.0f, 0.0f, 32767.0f)); // limit to one step every 4 ticks or 16bit int max (~546mm/s)
+   minFeedRate = int(tickPerMin / (65537.0f * stepsPerMM)); // prevent 16bit int overflow on very low feed rates
    
    position = 0;
-   tickPerStep = 2e9;
+   tickPerStep = 65535;
    moveDirection = Stopped;
    ditherCounter = 1;
    
@@ -66,16 +67,16 @@ uStepper::~uStepper()
 }
 
 
-void uStepper::setSpeed(int32_t feedRate){  // pass in speed [MM/min]
+void uStepper::setSpeed(int feedRate){  // pass in speed [MM/min]
    
    feedRate = constrain(feedRate, -maxFeedRate, maxFeedRate);
    
-   if(feedRate < -6) // avoid silly low speeds to prevent 16bit int overflow
+   if(feedRate < -minFeedRate) // avoid silly low speeds to prevent 16bit int overflow
    {
       digitalWrite(directionPin, REVERSE);
       moveDirection = Negative;
    }
-   else if(feedRate > 6)
+   else if(feedRate > minFeedRate)
    {
       digitalWrite(directionPin, FORWARD);
       moveDirection = Positive;
@@ -83,7 +84,7 @@ void uStepper::setSpeed(int32_t feedRate){  // pass in speed [MM/min]
    else
    {
       moveDirection = Stopped;
-      tickPerStep = 2e9;
+      tickPerStep = 65535;
       return;  // exit now
    }
    
@@ -100,13 +101,13 @@ void uStepper::setSpeed(int32_t feedRate){  // pass in speed [MM/min]
    
    if (offset < 0.5f)
    {
-      offset += 0.000031f; // avoid divide by zero (and overflow of 16bit int)
+      offset += 0.0000306f; // avoid divide by zero (and overflow of 16bit int)
       ditherTotalSteps = int( 1.0f / offset + 0.5f); // add 0.5 to force correct up/down rounding
       ditherLongSteps = 1; // only one long step
    }
    else
    {
-      offset = 1.000031f - offset; 
+      offset = 1.0000306f - offset; 
       ditherTotalSteps = int( 1.0f / offset + 0.5f);
       ditherLongSteps  = ditherTotalSteps - 1;  // only one short step
    }
@@ -117,11 +118,17 @@ void uStepper::setSpeed(int32_t feedRate){  // pass in speed [MM/min]
    //Serial.print(tickPerStep); Serial.print("\t");
    //Serial.print(ditherTotalSteps - ditherLongSteps); Serial.print("\t");  // small steps
    //Serial.print(ditherLongSteps); Serial.print("\t");                     // large steps
-   //Serial.print(float(ditherLongSteps * (tickPerStep + 1) + (ditherTotalSteps - ditherLongSteps) * tickPerStep) / float(ditherTotalSteps), 2); Serial.print("\t");
-   //Serial.print(maxFeedRate); Serial.print("\t");
+   //Serial.print(float(ditherLongSteps * (tickPerStep + 1) + (ditherTotalSteps - ditherLongSteps) * tickPerStep) / float(ditherTotalSteps), 2); Serial.print("\t"); // actual interpolated speed
+   //Serial.print(maxFeedRate/60); Serial.print("\t");
+   //Serial.print(minFeedRate); Serial.print("\t");
 
 }
 
+
+void uStepper::setMinVelocity(float minVel)
+{
+   minFeedRate = max(int(minVel + 0.5f), int(tickPerMin / (65537.0f * stepsPerMM)) );
+}
 
 void uStepper::stepPulseOff()
 {
@@ -182,7 +189,7 @@ void uStepper::enable()
 {
    digitalWrite(enablePin, HIGH);
    moveDirection = Stopped;
-   tickPerStep = 2e9;
+   tickPerStep = 65535;
 }
 
 
@@ -190,7 +197,7 @@ void uStepper::disable()
 {
    digitalWrite(enablePin, LOW);
    moveDirection = Stopped;
-   tickPerStep = 2e9;
+   tickPerStep = 65535;
 }
 
 
