@@ -30,9 +30,13 @@
          ~uStepper();
          
          void setSpeed(int feedRate);
-         float positionFloat();
+         void setTickRateHz(const uint32_t &  _tickRateHz);
          
-         void setZero();
+         float getPositionMM();
+         int32_t getPositionSteps();
+         
+         void setPosition(const float & posFloat);
+         void setPosition(const uint32_t & posInt);
          void setMinVelocity(float minVel);
          
          void enable();
@@ -52,13 +56,15 @@
          int directionPin, stepPin, enablePin;
          int FORWARD, REVERSE;
          
-         int ditherTotalSteps, ditherLongSteps, ditherCounter;
+         volatile int ditherTotalSteps, ditherLongSteps, ditherCounter;
 
          int maxFeedRate, minFeedRate;
          
          volatile int32_t  position;
+         
+         volatile uint32_t  tickPerStep;
           
-         unsigned int tickCounter, tickPerStep;
+         unsigned int tickCounter;
          float tickPerMin;
          
          enum moveDir_t {

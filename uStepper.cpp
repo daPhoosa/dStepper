@@ -26,9 +26,7 @@ uStepper::uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _ste
    MMPerStep  = 1.0f / _stepsPerMM; // [mm/step]
    stepsPerMM = _stepsPerMM;        // [steps/mm]
    
-   tickPerMin = _tickRateHz * 60.0f;
-   maxFeedRate = int(constrain((tickPerMin * MMPerStep) / 2.0f, 0.0f, 32767.0f)); // limit to one step every 4 ticks or 16bit int max (~546mm/s)
-   minFeedRate = int(tickPerMin / (65537.0f * stepsPerMM)); // prevent 16bit int overflow on very low feed rates
+   setTickRateHz(_tickRateHz);
    
    position = 0;
    tickPerStep = 65535;
@@ -99,17 +97,25 @@ void uStepper::setSpeed(int feedRate){  // pass in speed [MM/min]
    // compute step dithering
    float offset = idealTickPerStep - float(tickPerStep); // should be a decimal between 0 and 1
    
-   if (offset < 0.5f)
+   if (offset < 0.4999695f)
    {
       offset += 0.0000306f; // avoid divide by zero (and overflow of 16bit int)
-      ditherTotalSteps = int( 1.0f / offset + 0.5f); // add 0.5 to force correct up/down rounding
-      ditherLongSteps = 1; // only one long step
+      int temp = int( 1.0f / offset + 0.5f ); // add 0.5 to force correct up/down rounding
+      
+      noInterrupts(); // these variables are shared with the interupt function
+      ditherTotalSteps = temp;
+      ditherLongSteps  = 1; // only one long step
+      interrupts();
    }
    else
    {
       offset = 1.0000306f - offset; 
-      ditherTotalSteps = int( 1.0f / offset + 0.5f);
+      int temp = int( 1.0f / offset + 0.5f );
+      
+      noInterrupts(); // these variables are shared with the interupt function
+      ditherTotalSteps = temp;
       ditherLongSteps  = ditherTotalSteps - 1;  // only one short step
+      interrupts();
    }
    
    // *** Debug Output ***
@@ -127,8 +133,17 @@ void uStepper::setSpeed(int feedRate){  // pass in speed [MM/min]
 
 void uStepper::setMinVelocity(float minVel)
 {
-   minFeedRate = max(int(minVel + 0.5f), int(tickPerMin / (65537.0f * stepsPerMM)) );
+   minFeedRate = max( int(minVel + 0.5f), int(tickPerMin / (65537.0f * stepsPerMM)) ); // prevent 16bit int overflow on very low feed rates
 }
+
+
+void uStepper::setTickRateHz(const uint32_t & _tickRateHz)
+{
+   tickPerMin = float(_tickRateHz) * 60.0f;
+   maxFeedRate = int(constrain((tickPerMin * MMPerStep) * 0.5f, 0.0f, 32767.0f)); // limit to one step every other tick or 16bit int max (~546mm/s @ 80step/mm)
+   setMinVelocity(minFeedRate); // insure changes in tick rate do not result in excessively low min vel limits
+}
+
 
 void uStepper::stepPulseOff()
 {
@@ -147,6 +162,7 @@ void uStepper::stepPulseOff()
       tickCounter = 0; // slower long step time
       //Serial.print("[-L-] ");
    }
+   
    ditherCounter++;   
 }
 
@@ -173,15 +189,41 @@ void uStepper::stepPulseOn()
 }
 
 
-float uStepper::positionFloat()
+float uStepper::getPositionMM()
 {
-   return float(position) * MMPerStep;
+   noInterrupts();
+   int32_t temp = position;
+   interrupts();
+   
+   return float(temp) * MMPerStep;
 }
 
 
-void uStepper::setZero()
+int32_t uStepper::getPositionSteps()
 {
-   position = 0;
+   noInterrupts();
+   int32_t temp = position;
+   interrupts();
+   
+   return temp;
+}
+
+
+void uStepper::setPosition(const float & posFloat)
+{
+   uint32_t posInt = posFloat * stepsPerMM + 0.5f;
+   
+   noInterrupts();
+   position = posInt;
+   interrupts();
+}
+
+
+void uStepper::setPosition(const uint32_t & posInt)
+{
+   noInterrupts();
+   position = posInt;
+   interrupts();
 }
 
 
