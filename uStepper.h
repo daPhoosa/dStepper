@@ -31,14 +31,13 @@
          
          void setSpeed(int feedRate);
          void setTickRateHz(const uint32_t &  _tickRateHz);
+         void setPosition(const float & posFloat);
+         void setPosition(const int32_t & posInt);
+         void setMinVelocity(float minVel);
          
          float getPositionMM();
          int32_t getPositionSteps();
-         
-         void setPosition(const float & posFloat);
-         void setPosition(const uint32_t & posInt);
-         void setMinVelocity(float minVel);
-         
+
          void enable();
          void disable();
          
@@ -51,6 +50,7 @@
          void stepPulseOn();
          
          boolean stepPinOn;
+         boolean enabled;
          
          float stepsPerMM, MMPerStep;
          int directionPin, stepPin, enablePin;
@@ -63,7 +63,7 @@
          volatile int32_t  position;
          
          volatile uint32_t  tickPerStep;
-          
+
          unsigned int tickCounter;
          float tickPerMin;
          
@@ -85,10 +85,10 @@
       if(tickCounter >= tickPerStep) // send step to motor
       { 
          // This is executed twice:
-         //    * first to set the tick pin high
+         //    * first to set the pulse pin high
          //    * second to set it low (on the following call)
          //
-         // This insures sufficient time for the stepper controller to see the tick, without adding an artificial delay into the ISR
+         // This insures sufficient time for the stepper controller to see the pulse, without adding an artificial delay into the ISR
       
          if(stepPinOn)    // check if pin is already high 
          { 

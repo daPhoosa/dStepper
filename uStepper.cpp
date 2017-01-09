@@ -20,6 +20,10 @@
 #include "uStepper.h"
 
 
+// ***************************
+//     PUBLIC FUNCTIONS
+// ***************************
+
 
 uStepper::uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _stepPin, int _dirPin, int _enablePin){
    
@@ -55,7 +59,7 @@ uStepper::uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _ste
    // Config Enable Pin
    enablePin = _enablePin;
    pinMode(enablePin, OUTPUT);
-   digitalWrite(enablePin, LOW);
+   disable();
 
 }
 
@@ -67,7 +71,14 @@ uStepper::~uStepper()
 
 void uStepper::setSpeed(int feedRate){  // pass in speed [MM/min]
    
-   feedRate = constrain(feedRate, -maxFeedRate, maxFeedRate);
+   if( enabled )
+   {
+      feedRate = constrain(feedRate, -maxFeedRate, maxFeedRate);
+   }
+   else
+   {
+      feedRate = 0.0f;
+   }
    
    if(feedRate < -minFeedRate) // avoid silly low speeds to prevent 16bit int overflow
    {
@@ -131,6 +142,24 @@ void uStepper::setSpeed(int feedRate){  // pass in speed [MM/min]
 }
 
 
+void uStepper::setPosition(const float & posFloat)
+{
+   uint32_t posInt = posFloat * stepsPerMM + 0.5f;
+   
+   noInterrupts();
+   position = posInt;
+   interrupts();
+}
+
+
+void uStepper::setPosition(const int32_t & posInt)
+{
+   noInterrupts();
+   position = posInt;
+   interrupts();
+}
+
+
 void uStepper::setMinVelocity(float minVel)
 {
    minFeedRate = max( int(minVel + 0.5f), int(tickPerMin / (65537.0f * stepsPerMM)) ); // prevent 16bit int overflow on very low feed rates
@@ -140,9 +169,52 @@ void uStepper::setMinVelocity(float minVel)
 void uStepper::setTickRateHz(const uint32_t & _tickRateHz)
 {
    tickPerMin = float(_tickRateHz) * 60.0f;
-   maxFeedRate = int(constrain((tickPerMin * MMPerStep) * 0.5f, 0.0f, 32767.0f)); // limit to one step every other tick or 16bit int max (~546mm/s @ 80step/mm)
+   maxFeedRate = int(constrain((tickPerMin * MMPerStep) * 0.333f, 0.0f, 32767.0f)); // limit to one step every three tick or 16bit int max (~546mm/s @ 80step/mm)
    setMinVelocity(minFeedRate); // insure changes in tick rate do not result in excessively low min vel limits
 }
+
+
+float uStepper::getPositionMM()
+{
+   noInterrupts();
+   int32_t temp = position;
+   interrupts();
+   
+   return float(temp) * MMPerStep;
+}
+
+
+int32_t uStepper::getPositionSteps()
+{
+   noInterrupts();
+   int32_t temp = position;
+   interrupts();
+   
+   return temp;
+}
+
+
+void uStepper::enable()
+{
+   digitalWrite(enablePin, LOW);
+   moveDirection = Stopped;
+   tickPerStep = 65535;
+   enabled = true;
+}
+
+
+void uStepper::disable()
+{
+   digitalWrite(enablePin, HIGH);
+   moveDirection = Stopped;
+   tickPerStep = 65535;
+   enabled = false;
+}
+
+
+// ***************************
+//     PRIVATE FUNCTIONS
+// ***************************
 
 
 void uStepper::stepPulseOff()
@@ -189,58 +261,7 @@ void uStepper::stepPulseOn()
 }
 
 
-float uStepper::getPositionMM()
-{
-   noInterrupts();
-   int32_t temp = position;
-   interrupts();
-   
-   return float(temp) * MMPerStep;
-}
 
-
-int32_t uStepper::getPositionSteps()
-{
-   noInterrupts();
-   int32_t temp = position;
-   interrupts();
-   
-   return temp;
-}
-
-
-void uStepper::setPosition(const float & posFloat)
-{
-   uint32_t posInt = posFloat * stepsPerMM + 0.5f;
-   
-   noInterrupts();
-   position = posInt;
-   interrupts();
-}
-
-
-void uStepper::setPosition(const uint32_t & posInt)
-{
-   noInterrupts();
-   position = posInt;
-   interrupts();
-}
-
-
-void uStepper::enable()
-{
-   digitalWrite(enablePin, HIGH);
-   moveDirection = Stopped;
-   tickPerStep = 65535;
-}
-
-
-void uStepper::disable()
-{
-   digitalWrite(enablePin, LOW);
-   moveDirection = Stopped;
-   tickPerStep = 65535;
-}
 
 
 
