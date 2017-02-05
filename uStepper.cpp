@@ -84,16 +84,19 @@ void uStepper::setSpeed(int feedRate){  // pass in speed [MM/min]
    {
       digitalWrite(directionPin, REVERSE);
       moveDirection = Negative;
+      velocity = float( feedRate ); // mm/s
    }
    else if(feedRate > minFeedRate)
    {
       digitalWrite(directionPin, FORWARD);
       moveDirection = Positive;
+      velocity = float( feedRate ); // mm/s
    }
    else
    {
       moveDirection = Stopped;
       tickPerStep = 65535;
+      velocity = 0.0f; // mm/s
       return;  // exit now
    }
    
@@ -160,12 +163,6 @@ void uStepper::setPosition(const int32_t & posInt)
 }
 
 
-void uStepper::setMinVelocity(float minVel)
-{
-   minFeedRate = max( int(minVel + 0.5f), int(tickPerMin / (65537.0f * stepsPerMM)) ); // prevent 16bit int overflow on very low feed rates
-}
-
-
 void uStepper::setTickRateHz(const uint32_t & _tickRateHz)
 {
    tickPerMin = float(_tickRateHz) * 60.0f;
@@ -191,6 +188,12 @@ int32_t uStepper::getPositionSteps()
    interrupts();
    
    return temp;
+}
+
+
+float uStepper::getSpeed() // return velocity in mm/s
+{
+   return velocity * 0.01666666667f;
 }
 
 
@@ -260,6 +263,11 @@ void uStepper::stepPulseOn()
    }   
 }
 
+
+void uStepper::setMinVelocity(float minVel)
+{
+   minFeedRate = max( int(minVel + 0.5f), int(tickPerMin / (65537.0f * stepsPerMM)) ); // prevent 16bit int overflow on very low feed rates
+}
 
 
 

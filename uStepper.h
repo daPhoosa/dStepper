@@ -33,10 +33,10 @@
          void setTickRateHz(const uint32_t &  _tickRateHz);
          void setPosition(const float & posFloat);
          void setPosition(const int32_t & posInt);
-         void setMinVelocity(float minVel);
          
          float getPositionMM();
          int32_t getPositionSteps();
+         float getSpeed();
 
          void enable();
          void disable();
@@ -48,6 +48,7 @@
       
          void stepPulseOff();
          void stepPulseOn();
+         void setMinVelocity(float minVel);
          
          boolean stepPinOn;
          boolean enabled;
@@ -66,6 +67,8 @@
 
          unsigned int tickCounter;
          float tickPerMin;
+         
+         float velocity;
          
          enum moveDir_t {
             Positive,
