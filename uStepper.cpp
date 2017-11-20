@@ -69,9 +69,8 @@ uStepper::~uStepper()
 }
 
 
-void uStepper::setSpeed(int feedRate){  // pass in speed [MM/s]
-
-   feedRate *= 60.0f; // convert to mm/min
+void uStepper::setSpeed(int feedRate)    // pass in speed [MM/min]
+{
    
    if( enabled )
    {
