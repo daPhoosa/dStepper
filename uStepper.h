@@ -29,6 +29,7 @@
          uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _stepPin, int _dirPin, int _enablePin);
          ~uStepper();
          
+         void setSpeed(float feedRate);
          void setSpeed(int feedRate);
          void setTickRateHz(const uint32_t &  _tickRateHz);
          void setPosition(const float & posFloat);
