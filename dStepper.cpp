@@ -74,6 +74,7 @@ void dStepper::setSpeed(float feedRate)    // pass in speed [MM/s]
    setSpeed( int(feedRate * 60.0f) );
 }
 
+
 void dStepper::setSpeed(int feedRate)    // pass in speed [MM/min]
 {
    
@@ -112,7 +113,9 @@ void dStepper::setSpeed(int feedRate)    // pass in speed [MM/min]
 
    float idealTickPerStep = tickPerMin / stepsPerMin;  // [tick/min] / [step/min] = [tick/step]
 
-   tickPerStep = long(idealTickPerStep); 
+   noInterrupts();
+   tickPerStep = uint32_t( idealTickPerStep ); 
+   interrupts();
    
    // compute step dithering
    float offset = idealTickPerStep - float(tickPerStep); // should be a decimal between 0 and 1
@@ -153,7 +156,7 @@ void dStepper::setSpeed(int feedRate)    // pass in speed [MM/min]
 
 void dStepper::setPosition(const float & posFloat)
 {
-   uint32_t posInt = posFloat * stepsPerMM + 0.5f;
+   int32_t posInt = posFloat * stepsPerMM + 0.5f;
    
    noInterrupts();
    position = posInt;
