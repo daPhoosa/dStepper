@@ -1,5 +1,5 @@
-# **uStepper**
-Simple Stepper Driver Library
+# **dStepper**
+Simple Dithering Stepper Driver Library
 
 * Designed for interupt driven stepping
 * Pulse dithering for more accurate speed control and smoother high speed operation
@@ -12,7 +12,7 @@ Simple Stepper Driver Library
 
 ### Object Creation:
 ```
-uStepper your_motor( stepsPerMM, direction, tickRateHz, stepPin, directionPin, enablePin);
+dStepper your_motor( stepsPerMM, direction, tickRateHz, stepPin, directionPin, enablePin);
 ```
 * stepsPerMM -- usually defined by motor steps, pully size and micro-stepping ( A 200 step motor, with 20T GT2 pully with 1/16 microstepping will have 80 steps per mm)
 * direction -- changing between 0 and 1 will change the direction of rotation

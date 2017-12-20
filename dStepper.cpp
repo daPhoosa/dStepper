@@ -1,5 +1,5 @@
 /*
-      uStepper -- Simple Stepper Driver Library
+      dStepper -- Simple Stepper Driver Library
       Copyright (C) 2016  Phillip J Schmidt
       
          This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 
  */
 
-#include "uStepper.h"
+#include "dStepper.h"
 
 
 // ***************************
@@ -25,7 +25,7 @@
 // ***************************
 
 
-uStepper::uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _stepPin, int _dirPin, int _enablePin){
+dStepper::dStepper(float _stepsPerMM, int direction, float _tickRateHz, int _stepPin, int _dirPin, int _enablePin){
    
    MMPerStep  = 1.0f / _stepsPerMM; // [mm/step]
    stepsPerMM = _stepsPerMM;        // [steps/mm]
@@ -64,17 +64,17 @@ uStepper::uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _ste
 }
 
 
-uStepper::~uStepper()
+dStepper::~dStepper()
 {
 }
 
 
-void uStepper::setSpeed(float feedRate)    // pass in speed [MM/s]
+void dStepper::setSpeed(float feedRate)    // pass in speed [MM/s]
 {
    setSpeed( int(feedRate * 60.0f) );
 }
 
-void uStepper::setSpeed(int feedRate)    // pass in speed [MM/min]
+void dStepper::setSpeed(int feedRate)    // pass in speed [MM/min]
 {
    
    if( enabled )
@@ -151,7 +151,7 @@ void uStepper::setSpeed(int feedRate)    // pass in speed [MM/min]
 }
 
 
-void uStepper::setPosition(const float & posFloat)
+void dStepper::setPosition(const float & posFloat)
 {
    uint32_t posInt = posFloat * stepsPerMM + 0.5f;
    
@@ -161,7 +161,7 @@ void uStepper::setPosition(const float & posFloat)
 }
 
 
-void uStepper::setPosition(const int32_t & posInt)
+void dStepper::setPosition(const int32_t & posInt)
 {
    noInterrupts();
    position = posInt;
@@ -169,7 +169,7 @@ void uStepper::setPosition(const int32_t & posInt)
 }
 
 
-void uStepper::setTickRateHz(const uint32_t & _tickRateHz)
+void dStepper::setTickRateHz(const uint32_t & _tickRateHz)
 {
    tickPerMin = float(_tickRateHz) * 60.0f;
    maxFeedRate = int(constrain((tickPerMin * MMPerStep) * 0.333f, 0.0f, 32767.0f)); // limit to one step every three tick or 16bit int max (~546mm/s @ 80step/mm)
@@ -177,7 +177,7 @@ void uStepper::setTickRateHz(const uint32_t & _tickRateHz)
 }
 
 
-float uStepper::getPositionMM()
+float dStepper::getPositionMM()
 {
    noInterrupts();
    int32_t temp = position;
@@ -187,7 +187,7 @@ float uStepper::getPositionMM()
 }
 
 
-int32_t uStepper::getPositionSteps()
+int32_t dStepper::getPositionSteps()
 {
    noInterrupts();
    int32_t temp = position;
@@ -197,13 +197,13 @@ int32_t uStepper::getPositionSteps()
 }
 
 
-float uStepper::getSpeed() // return velocity in mm/s
+float dStepper::getSpeed() // return velocity in mm/s
 {
    return velocity * 0.01666666667f;
 }
 
 
-void uStepper::enable()
+void dStepper::enable()
 {
    digitalWrite(enablePin, LOW);
    moveDirection = Stopped;
@@ -212,7 +212,7 @@ void uStepper::enable()
 }
 
 
-void uStepper::disable()
+void dStepper::disable()
 {
    digitalWrite(enablePin, HIGH);
    moveDirection = Stopped;
@@ -226,7 +226,7 @@ void uStepper::disable()
 // ***************************
 
 
-void uStepper::stepPulseOff()
+void dStepper::stepPulseOff()
 {
    digitalWrite(stepPin, LOW);   // set pin low
    stepPinOn = false;
@@ -248,7 +248,7 @@ void uStepper::stepPulseOff()
 }
 
 
-void uStepper::stepPulseOn()
+void dStepper::stepPulseOn()
 {
    if(moveDirection == Positive)
    {
@@ -270,7 +270,7 @@ void uStepper::stepPulseOn()
 }
 
 
-void uStepper::setMinVelocity(float minVel)
+void dStepper::setMinVelocity(float minVel)
 {
    minFeedRate = max( int(minVel + 0.5f), int(tickPerMin / (65537.0f * stepsPerMM)) ); // prevent 16bit int overflow on very low feed rates
 }

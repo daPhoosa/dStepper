@@ -1,5 +1,5 @@
 /*
-      uStepper -- Simple Stepper Driver Library
+      dStepper -- Simple Stepper Driver Library
       Copyright (C) 2016  Phillip J Schmidt
       
          This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,17 @@
 
  */
  
-#ifndef uStepper_h
-   #define uStepper_h
+#ifndef dStepper_h
+   #define dStepper_h
    
    #include <arduino.h>
 
-   class uStepper
+   class dStepper
    {
       public:
       
-         uStepper(float _stepsPerMM, int direction, float _tickRateHz, int _stepPin, int _dirPin, int _enablePin);
-         ~uStepper();
+         dStepper(float _stepsPerMM, int direction, float _tickRateHz, int _stepPin, int _dirPin, int _enablePin);
+         ~dStepper();
          
          void setSpeed(float feedRate);
          void setSpeed(int feedRate);
@@ -81,7 +81,7 @@
    
    
    // defined in header to allow "inline" declaration
-   inline void uStepper::step(){  // call from ISR
+   inline void dStepper::step(){  // call from ISR
       
       // This is kept fast by only executing an increment and a comparison on most calls (depending on speed)
       tickCounter++;
