@@ -30,8 +30,7 @@
          ~dStepper();
          
          void setSpeed(float feedRate);
-         void setSpeed(int feedRate);
-         void setTickRateHz(const uint32_t &  _tickRateHz);
+         void setTickRateHz(const uint32_t &  t_tickRateHz);
          void setPosition(const float & posFloat);
          void setPosition(const int32_t & posInt);
          
@@ -47,35 +46,21 @@
 
       private:
       
-         void stepPulseOff();
-         void stepPulseOn();
-         void setMinVelocity(float minVel);
-         
-         boolean stepPinOn;
-         boolean enabled;
-         
+         float stepperConstant;
+         float tickRateHz;
          float stepsPerMM, MMPerStep;
+
+         float feedRate, maxFeedRate;
+
          int directionPin, stepPin, enablePin;
          int FORWARD, REVERSE;
-         
-         volatile int ditherTotalSteps, ditherLongSteps, ditherCounter;
+         bool stepPinOn;
 
-         int maxFeedRate, minFeedRate;
-         
-         volatile int32_t  position;
-         
-         volatile uint32_t  tickPerStep;
+         volatile uint16_t ticksPerStep, tickCounter;
 
-         unsigned int tickCounter;
-         float tickPerMin;
-         
-         float velocity;
-         
-         enum moveDir_t {
-            Positive,
-            Negative,
-            Stopped
-         } moveDirection;
+         volatile int32_t position;
+
+         bool moveDirectionPositive, enabled;
 
    };
    
@@ -83,26 +68,29 @@
    // defined in header to allow "inline" declaration
    inline void dStepper::step(){  // call from ISR
       
-      // This is kept fast by only executing an increment and a comparison on most calls (depending on speed)
-      tickCounter++;
+      uint16_t next = tickCounter + ticksPerStep;
 
-      if(tickCounter >= tickPerStep) // send step to motor
-      { 
-         // This is executed twice:
-         //    * first to set the pulse pin high
-         //    * second to set it low (on the following call)
-         //
-         // This insures sufficient time for the stepper controller to see the pulse, without adding an artificial delay into the ISR
-      
-         if(stepPinOn)    // check if pin is already high 
-         { 
-            stepPulseOff();
+      if( stepPinOn ) // it is faster to set/check a boolean than to check the actual pin
+      {
+         digitalWrite( stepPin, LOW );   // set pin low
+         stepPinOn = false;
+      }
+      else if( next < tickCounter ) // detect rollover
+      {
+         digitalWrite( stepPin, HIGH );
+         stepPinOn = true;
+         
+         if( moveDirectionPositive )
+         {
+            position++;
          }
          else
          {
-            stepPulseOn();
+            position--;
          }
       }
+
+      tickCounter = next;
    }
 
    
