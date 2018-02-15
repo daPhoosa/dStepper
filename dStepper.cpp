@@ -85,7 +85,7 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
 
       noInterrupts();
       digitalWrite(directionPin, REVERSE);
-      moveDirectionPositive = true;
+      moveDirectionPositive = false;
       ticksPerStep = tps;
       interrupts();
    }
@@ -95,7 +95,7 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
 
       noInterrupts();
       digitalWrite(directionPin, FORWARD);
-      moveDirectionPositive = false;
+      moveDirectionPositive = true;
       ticksPerStep = tps;
       interrupts();
    }
