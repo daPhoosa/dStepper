@@ -61,6 +61,6 @@ your_motor.step();
 * This should be run from an interrupt for best performance.  For the less experienced user, a library that can make this easier is: FrequencyTimer2 https://github.com/PaulStoffregen/FrequencyTimer2
 * The call rate should match the rate specified at object creation (tickRateHz)
 * Jitter from imperfect call rates will not cause adverse software function but may affect motor function/smoothness
-* This has very low computational requrement.  Most calls only incur an integer increment and compare.  Critical variables are pre-computed in the setSpeed() function.
+* This has very low computational requrement.
 
 

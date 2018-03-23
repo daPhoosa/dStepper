@@ -60,7 +60,8 @@
 
          volatile int32_t position;
 
-         bool moveDirectionPositive, enabled;
+         bool enabled;
+         int moveDirection;
 
    };
    
@@ -68,29 +69,20 @@
    // defined in header to allow "inline" declaration
    inline void dStepper::step(){  // call from ISR
       
-      uint16_t next = tickCounter + ticksPerStep;
+      uint16_t prev = tickCounter;
+      tickCounter += ticksPerStep;
 
-      if( stepPinOn ) // it is faster to set/check a boolean than to check the actual pin
+      if( stepPinOn )
       {
          digitalWrite( stepPin, LOW );   // set pin low
          stepPinOn = false;
       }
-      else if( next < tickCounter ) // detect rollover
+      else if( tickCounter < prev ) // detect rollover
       {
          digitalWrite( stepPin, HIGH );
          stepPinOn = true;
-         
-         if( moveDirectionPositive )
-         {
-            position++;
-         }
-         else
-         {
-            position--;
-         }
+         position += moveDirection;
       }
-
-      tickCounter = next;
    }
 
    
