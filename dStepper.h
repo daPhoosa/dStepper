@@ -67,8 +67,8 @@
    
    
    // defined in header to allow "inline" declaration
-   inline void dStepper::step(){  // call from ISR
-      
+   inline void dStepper::step()     // call from ISR
+   {  
       uint16_t prev = tickCounter;
       tickCounter += ticksPerStep;
 

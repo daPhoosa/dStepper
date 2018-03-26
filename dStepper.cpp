@@ -70,32 +70,40 @@ dStepper::~dStepper()
 
 void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
 {
-   if( enabled )
-   {
-      feedRate = constrain( t_feedRate, -maxFeedRate, maxFeedRate );
-   }
-   else
+   if( !enabled )
    {
       feedRate = 0.0f;
+      noInterrupts();
+      ticksPerStep = 0;
+      interrupts();
+      return;
    }
    
-   if( feedRate < 0.0f )     // reverse
+   if( feedRate < 0.0f )     // REVERSE
    {
+      feedRate = max( t_feedRate, -maxFeedRate );  // constrain
       uint16_t tps = uint16_t( stepperConstant * -feedRate );
 
       noInterrupts();
-      digitalWrite(directionPin, REVERSE);
-      moveDirection = -1;
+      if( moveDirection != -1 ) // only set when a direction change happens, saves time
+      {
+         digitalWrite(directionPin, REVERSE);
+         moveDirection = -1;
+      }
       ticksPerStep = tps;
       interrupts();
    }
-   else                     // forward
+   else                      // FORWARD
    {
+      feedRate = min( t_feedRate, maxFeedRate );  // constrain
       uint16_t tps = uint16_t( stepperConstant * feedRate );
 
       noInterrupts();
-      digitalWrite(directionPin, FORWARD);
-      moveDirection = 1;
+      if( moveDirection != 1 ) // only set when a direction change happens, saves time
+      {
+         digitalWrite(directionPin, FORWARD);
+         moveDirection = 1;
+      }
       ticksPerStep = tps;
       interrupts();
    }
