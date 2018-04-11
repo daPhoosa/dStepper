@@ -1,17 +1,17 @@
 /*
       dStepper -- Simple Stepper Driver Library
       Copyright (C) 2016  Phillip J Schmidt
-      
+
          This program is free software: you can redistribute it and/or modify
          it under the terms of the GNU General Public License as published by
          the Free Software Foundation, either version 3 of the License, or
          (at your option) any later version.
-         
+
          This program is distributed in the hope that it will be useful,
          but WITHOUT ANY WARRANTY; without even the implied warranty of
          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
          GNU General Public License for more details.
-         
+
          You should have received a copy of the GNU General Public License
          along with this program.  If not, see <http://www.gnu.org/licenses/>
 
@@ -26,10 +26,11 @@
 
 
 dStepper::dStepper(float t_stepsPerMM, int t_direction, float t_tickRateHz, int t_stepPin, int t_dirPin, int t_enablePin){
-   
+
    stepsPerMM = t_stepsPerMM;
    MMPerStep  = 1.0f / stepsPerMM;
    setTickRateHz( t_tickRateHz );
+   setMinSpeed( 0.0f );
 
    ticksPerStep = 0;
 
@@ -52,7 +53,7 @@ dStepper::dStepper(float t_stepsPerMM, int t_direction, float t_tickRateHz, int 
    else
    {
       FORWARD = 0;
-      REVERSE = 1;      
+      REVERSE = 1;
    }
 
    // Config Enable Pin
@@ -70,39 +71,41 @@ dStepper::~dStepper()
 
 void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
 {
-   if( !enabled )
+   if( !enabled ||                     // not enabled
+       abs(t_feedRate) < minFeedRate ) // feed rate below minimum
    {
-      feedRate = 0.0f;
-      noInterrupts();
-      ticksPerStep = 0;
-      interrupts();
+      feedRate      = 0.0f;
+      ticksPerStep  = 0;
+      moveDirection = stopped;
       return;
    }
-   
-   if( feedRate < 0.0f )     // REVERSE
+
+   if( t_feedRate < 0.0f )     // REVERSE
    {
-      feedRate = max( t_feedRate, -maxFeedRate );  // constrain
+      feedRate     = max( t_feedRate, -maxFeedRate );  // constrain
       uint16_t tps = uint16_t( stepperConstant * -feedRate );
+      //Serial.print(feedRate); Serial.print("\t"); Serial.println(tps);
 
       noInterrupts();
-      if( moveDirection != -1 ) // only set when a direction change happens, saves time
+      if( moveDirection != negative ) // only set when a direction change happens, saves time
       {
          digitalWrite(directionPin, REVERSE);
-         moveDirection = -1;
+         moveDirection = negative;
       }
       ticksPerStep = tps;
       interrupts();
    }
    else                      // FORWARD
    {
-      feedRate = min( t_feedRate, maxFeedRate );  // constrain
+      feedRate     = min( t_feedRate, maxFeedRate );  // constrain
       uint16_t tps = uint16_t( stepperConstant * feedRate );
+      //Serial.print(feedRate); Serial.print("\t"); Serial.println(tps);
 
       noInterrupts();
-      if( moveDirection != 1 ) // only set when a direction change happens, saves time
+      if( moveDirection != positive ) // only set when a direction change happens, saves time
       {
          digitalWrite(directionPin, FORWARD);
-         moveDirection = 1;
+         moveDirection = positive;
       }
       ticksPerStep = tps;
       interrupts();
@@ -122,7 +125,7 @@ void dStepper::setPosition(const float & posFloat)
    {
       posInt = int32_t( posFloat * stepsPerMM - 0.5f );
    }
-   
+
    noInterrupts();
    position = posInt;
    interrupts();
@@ -141,19 +144,24 @@ void dStepper::setTickRateHz(const uint32_t & t_tickRateHz)
 {
    tickRateHz = float(t_tickRateHz);
    maxFeedRate = 0.5f * tickRateHz * MMPerStep; // max feed rate is when sending a pulse every other tick
-   stepperConstant = float(1UL << 15) / maxFeedRate;
+   stepperConstant = powf( 2.0f, 15.0f ) / maxFeedRate;
+}
+
+
+void dStepper::setMinSpeed( float s )
+{
+   minFeedRate = max( s, 0.0f );
 }
 
 
 float dStepper::getPositionMM()
 {
-   int32_t temp;
-      
    noInterrupts();
-   temp = position;
+   int32_t  fullStep = position;
+   uint16_t fracStep = tickCounter;
    interrupts();
-   
-   return float(temp) * MMPerStep;
+
+   return ( float(fullStep) + float(fracStep) * (1.0f / powf( 2.0f, 16.0f ))) * MMPerStep;
 }
 
 
@@ -162,7 +170,7 @@ int32_t dStepper::getPositionSteps()
    noInterrupts();
    int32_t temp = position;
    interrupts();
-   
+
    return temp;
 }
 
