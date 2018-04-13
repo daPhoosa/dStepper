@@ -31,6 +31,7 @@ dStepper::dStepper(float t_stepsPerMM, int t_direction, float t_tickRateHz, int 
    MMPerStep  = 1.0f / stepsPerMM;
    setTickRateHz( t_tickRateHz );
    setMinSpeed( 0.0f );
+   setPositionSteps( 0L );
 
    ticksPerStep = 0;
 
@@ -113,29 +114,27 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
 }
 
 
-void dStepper::setPosition(const float & posFloat)
+void dStepper::setPositionMM( float posFloat )
 {
-   int32_t posInt;
+   posFloat *= stepsPerMM; // convert to steps
 
-   if( posFloat > 0.0f )
-   {
-      posInt = int32_t( posFloat * stepsPerMM + 0.5f );
-   }
-   else
-   {
-      posInt = int32_t( posFloat * stepsPerMM - 0.5f );
-   }
+   int32_t posInt = posFloat;      // whole steps
+   if( posFloat < 0.0f ) posInt--;
+
+   uint16_t posFrac = (posFloat - float(posInt)) * MAX_UINT_16; // fractional step
 
    noInterrupts();
-   position = posInt;
+   position    = posInt;
+   tickCounter = posFrac;
    interrupts();
 }
 
 
-void dStepper::setPosition(const int32_t & posInt)
+void dStepper::setPositionSteps(const int32_t & posInt)
 {
    noInterrupts();
-   position = posInt;
+   position    = posInt;
+   tickCounter = 0; // set to start of step
    interrupts();
 }
 
@@ -161,7 +160,7 @@ float dStepper::getPositionMM()
    uint16_t fracStep = tickCounter;
    interrupts();
 
-   return ( float(fullStep) + float(fracStep) * (1.0f / powf( 2.0f, 16.0f ))) * MMPerStep;
+   return ( float(fullStep) + float(fracStep) * (1.0f / MAX_UINT_16) ) * MMPerStep;
 }
 
 

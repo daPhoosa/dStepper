@@ -31,8 +31,8 @@
 
          void setSpeed(float feedRate);
          void setTickRateHz(const uint32_t &  t_tickRateHz);
-         void setPosition(const float & posFloat);
-         void setPosition(const int32_t & posInt);
+         void setPositionMM( float posFloat );
+         void setPositionSteps(const int32_t & posInt);
          void setMinSpeed( float s );
 
          float getPositionMM();
@@ -62,6 +62,8 @@
          volatile int32_t position;
 
          bool enabled;
+
+         const static float MAX_UINT_16 = powf( 2.0f, 16.0f );
 
          enum move_direction_t
          {
