@@ -30,6 +30,8 @@
          ~dStepper();
 
          void setSpeed(float feedRate);
+         void setSpeedByPostionMM( float targetPosMM );
+
          void setTickRateHz(const uint32_t &  t_tickRateHz);
          void setPositionMM( float posFloat );
          void setPositionSteps(const int32_t & posInt);
@@ -56,6 +58,8 @@
          int directionPin, stepPin, enablePin;
          int FORWARD, REVERSE;
          bool stepPinOn;
+
+         uint32_t lastUpdateTime;
 
          volatile uint16_t ticksPerStep, tickCounter;
 

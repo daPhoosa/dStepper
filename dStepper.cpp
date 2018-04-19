@@ -114,6 +114,20 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
 }
 
 
+void dStepper::setSpeedByPostionMM( float targetPosMM )
+{
+   uint32_t timeNow = micros();
+
+   float dt = 1000000.0f / float( timeNow - lastUpdateTime );
+
+   float newSpeed = feedRate + ( targetPosMM - getPositionMM() ) * dt;
+
+   setSpeed( newSpeed );
+
+   lastUpdateTime = timeNow;
+}
+
+
 void dStepper::setPositionMM( float posFloat )
 {
    posFloat *= stepsPerMM; // convert to steps
