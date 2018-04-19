@@ -36,15 +36,25 @@ your_motor.setSpeed( speed );
 * The direction pin is controlled from this function
 * Should be called after enable() has been called
 * Will operate at the request speed until called again with a different speed
-
-
-### Set/Get Motor Position:
 ```
-your_motor.setPosition( position );
+your_motor.setSpeedByPositionMM( targetPositionMM );
+```
+* Pass in the target position at regular intervals and this function will set the motor speed to minimize error
+* The target position must move smoothly to prevent unreasonable motor speed requests
+* The starting motor position should be set to starting motion control position using `setPositionMM()`
+
+
+### Set Motor Position:
+```
+your_motor.setPositionMM( position );
 ```
 * Passing a float will set the position in MM
+```
+your_motor.setPositionSteps( position );
+```
 * Passing an integer will set the position in steps
 
+### Get Motor Position:
 ```
 float position = your_motor.getPositionMM();       
 uint32_t position = your_motor.getPositionSteps(); 
