@@ -6,7 +6,7 @@ Simple Dithering Stepper Driver Library
 * Efficient functions will perform well with either 8 bit or 32 bit microcontrollers
 * Works with almost any stepper driver that accepts step and direction input (see: stepStick)
 * Handles setup and control of hardware pins 
-* Acceleration ramping and path planning are not performed by this library
+* Acceleration ramping and path planning are not performed by this library ( see `EasyMove` for basic 3 axis motion control )
 
 ## Basic Usage Documentation
 
@@ -38,10 +38,12 @@ your_motor.setSpeed( speed );
 * Will operate at the request speed until called again with a different speed
 ```
 your_motor.setSpeedByPositionMM( targetPositionMM );
+your_motor.setSpeedByPositionMM( targetPositionMM, Hz );
 ```
 * Pass in the target position at regular intervals and this function will set the motor speed to minimize error
 * The target position must move smoothly to prevent unreasonable motor speed requests
 * The starting motor position should be set to starting motion control position using `setPositionMM()`
+* Using the second option and passing the expected motion control frequency saves ~40us per motor compared to first option which computes it each execution
 
 
 ### Set Motor Position:

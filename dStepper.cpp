@@ -117,14 +117,20 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
 void dStepper::setSpeedByPostionMM( float targetPosMM )
 {
    uint32_t timeNow = micros();
+   float Hz = 1000000.0f / float( timeNow - lastUpdateTime ); // compute observed frequency
+   lastUpdateTime = timeNow;
 
-   float dt = 1000000.0f / float( timeNow - lastUpdateTime );
+   setSpeedByPostionMM( targetPosMM, Hz );
+}
 
-   float newSpeed = feedRate + ( targetPosMM - getPositionMM() ) * dt;
+
+void dStepper::setSpeedByPostionMM( float targetPosMM, float Hz )
+{
+   float newSpeed = ( targetPosMM + targetPosMM - targetPosPrev - getPositionMM() ) * Hz; //  = speed + error
 
    setSpeed( newSpeed );
 
-   lastUpdateTime = timeNow;
+   targetPosPrev  = targetPosMM;
 }
 
 

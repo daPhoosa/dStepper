@@ -31,6 +31,7 @@
 
          void setSpeed(float feedRate);
          void setSpeedByPostionMM( float targetPosMM );
+         void setSpeedByPostionMM( float targetPosMM, float Hz );
 
          void setTickRateHz(const uint32_t &  t_tickRateHz);
          void setPositionMM( float posFloat );
@@ -60,6 +61,7 @@
          bool stepPinOn;
 
          uint32_t lastUpdateTime;
+         float targetPosPrev;
 
          volatile uint16_t ticksPerStep, tickCounter;
 
