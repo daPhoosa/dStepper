@@ -127,10 +127,9 @@ void dStepper::setSpeedByPostionMM( float targetPosMM )
 void dStepper::setSpeedByPostionMM( float targetPosMM, float Hz )
 {
    float newSpeed = ( targetPosMM + targetPosMM - targetPosPrev - getPositionMM() ) * Hz; //  = speed + error
+   targetPosPrev  = targetPosMM;
 
    setSpeed( newSpeed );
-
-   targetPosPrev  = targetPosMM;
 }
 
 

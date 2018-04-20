@@ -5,7 +5,7 @@ Simple Dithering Stepper Driver Library
 * Pulse dithering for more accurate speed control and smoother high speed operation
 * Efficient functions will perform well with either 8 bit or 32 bit microcontrollers
 * Works with almost any stepper driver that accepts step and direction input (see: stepStick)
-* Handles setup and control of hardware pins 
+* Handles setup and control of hardware pins
 * Acceleration ramping and path planning are not performed by this library ( see `EasyMove` for basic 3 axis motion control )
 
 ## Basic Usage Documentation
@@ -58,8 +58,8 @@ your_motor.setPositionSteps( position );
 
 ### Get Motor Position:
 ```
-float position = your_motor.getPositionMM();       
-uint32_t position = your_motor.getPositionSteps(); 
+float position = your_motor.getPositionMM();
+uint32_t position = your_motor.getPositionSteps();
 ```
 * MM are returned as a 32bit float
 * Steps are return as an unsigned 32 bit int
