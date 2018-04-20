@@ -136,6 +136,8 @@ void dStepper::setSpeedByPostionMM( float targetPosMM, float Hz )
 
 void dStepper::setPositionMM( float posFloat )
 {
+   targetPosPrev = posFloat;
+
    posFloat *= stepsPerMM; // convert to steps
 
    int32_t posInt = posFloat;      // whole steps
@@ -152,6 +154,8 @@ void dStepper::setPositionMM( float posFloat )
 
 void dStepper::setPositionSteps(const int32_t & posInt)
 {
+   targetPosPrev = float( posInt ) * MMPerStep;
+
    noInterrupts();
    position    = posInt;
    tickCounter = 0; // set to start of step
