@@ -58,11 +58,11 @@ your_motor.setPositionSteps( position );
 
 ### Get Motor Position:
 ```
-float position = your_motor.getPositionMM();
-uint32_t position = your_motor.getPositionSteps();
+float   position = your_motor.getPositionMM();
+int32_t position = your_motor.getPositionSteps();
 ```
 * MM are returned as a 32bit float
-* Steps are return as an unsigned 32 bit int
+* Steps are return as an signed 32 bit int
 
 
 ### Sending Step Pulses
