@@ -117,19 +117,26 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
 void dStepper::setSpeedByPostionMM( float targetPosMM )
 {
    uint32_t timeNow = micros();
+   float Hz = 1000000.0f / float( timeNow - lastUpdateTime ); // compute observed frequency
+   lastUpdateTime = timeNow;
 
-   float dt = 1000000.0f / float( timeNow - lastUpdateTime );
+   setSpeedByPostionMM( targetPosMM, Hz );
+}
 
-   float newSpeed = feedRate + ( targetPosMM - getPositionMM() ) * dt;
+
+void dStepper::setSpeedByPostionMM( float targetPosMM, float Hz )
+{
+   float newSpeed = ( targetPosMM + targetPosMM - targetPosPrev - getPositionMM() ) * Hz; //  = speed + error
+   targetPosPrev  = targetPosMM;
 
    setSpeed( newSpeed );
-
-   lastUpdateTime = timeNow;
 }
 
 
 void dStepper::setPositionMM( float posFloat )
 {
+   targetPosPrev = posFloat;
+
    posFloat *= stepsPerMM; // convert to steps
 
    int32_t posInt = posFloat;      // whole steps
@@ -146,6 +153,8 @@ void dStepper::setPositionMM( float posFloat )
 
 void dStepper::setPositionSteps(const int32_t & posInt)
 {
+   targetPosPrev = float( posInt ) * MMPerStep;
+
    noInterrupts();
    position    = posInt;
    tickCounter = 0; // set to start of step
