@@ -139,10 +139,17 @@ void dStepper::setPositionMM( float posFloat )
 
    posFloat *= stepsPerMM; // convert to steps
 
-   int32_t posInt = posFloat;      // whole steps
-   if( posFloat < 0.0f ) posInt--;
+   int32_t posInt;      // whole steps
+   if( posFloat < 0.0f ) // deal with decimal truncation
+   {
+     posInt = (posFloat - 0.5f);
+   }
+   else
+   {
+     posInt = (posFloat + 0.5f);
+   }
 
-   uint16_t posFrac = (posFloat - float(posInt)) * MAX_UINT_16; // fractional step
+   int16_t posFrac = (posFloat - float(posInt)) * MAX_INT_16; // fractional step
 
    noInterrupts();
    position    = posInt;
@@ -179,11 +186,11 @@ void dStepper::setMinSpeed( float s )
 float dStepper::getPositionMM()
 {
    noInterrupts();
-   int32_t  fullStep = position;
-   uint16_t fracStep = tickCounter;
+   int32_t fullStep = position;
+   int16_t fracStep = tickCounter;
    interrupts();
 
-   return ( float(fullStep) + float(fracStep) * (1.0f / MAX_UINT_16) ) * MMPerStep;
+   return ( float(fullStep) + float(fracStep) * (1.0f / MAX_INT_16) ) * MMPerStep;
 }
 
 

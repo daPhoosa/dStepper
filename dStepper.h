@@ -63,13 +63,14 @@
          uint32_t lastUpdateTime;
          float targetPosPrev;
 
-         volatile uint16_t ticksPerStep, tickCounter;
+         volatile int16_t ticksPerStep;
+         volatile int16_t tickCounter;
 
          volatile int32_t position;
 
          bool enabled;
 
-         const static float MAX_UINT_16 = powf( 2.0f, 16.0f );
+         const static float MAX_INT_16 = powf( 2.0f, 16.0f ) - 1.0f;
 
          enum move_direction_t
          {
@@ -84,7 +85,7 @@
    // defined in header to allow "inline" declaration
    inline void dStepper::step()     // call from ISR
    {
-      uint16_t prev = tickCounter;
+      int16_t prev = tickCounter;
 
       if( stepPinOn )
       {
