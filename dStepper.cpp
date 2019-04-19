@@ -139,16 +139,7 @@ void dStepper::setPositionMM( float posFloat )
 
    posFloat *= stepsPerMM; // convert to steps
 
-   int32_t posInt;      // whole steps
-   if( posFloat < 0.0f ) // deal with decimal truncation
-   {
-     posInt = (posFloat - 0.5f);
-   }
-   else
-   {
-     posInt = (posFloat + 0.5f);
-   }
-
+   int32_t posInt  = round(posFloat); // whole steps ( use round to deal with decimal truncation)
    int16_t posFrac = (posFloat - float(posInt)) * MAX_INT_16; // fractional step
 
    noInterrupts();

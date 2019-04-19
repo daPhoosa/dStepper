@@ -19,7 +19,7 @@ dStepper your_motor( stepsPerMM, direction, tickRateHz, stepPin, directionPin, e
 * direction -- changing between 0 and 1 will change the direction of rotation
 * tickRateHz -- how often is the step() function called per second
 * stepPin -- which hardware pin is used to send the step pulse
-* directionPin -- which hardware pin is used to send teh direction signal
+* directionPin -- which hardware pin is used to send the direction signal
 * enablePin -- which hardware pin us used to enable/disable the stepper driver
 
 ### Enable/Disable Stepper
