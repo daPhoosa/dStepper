@@ -85,7 +85,6 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
    {
       feedRate     = max( t_feedRate, -maxFeedRate );  // constrain
       uint16_t tps = uint16_t( stepperConstant * -feedRate );
-      //Serial.print(feedRate); Serial.print("\t"); Serial.println(tps);
 
       noInterrupts();
       if( moveDirection != negative ) // only set when a direction change happens, saves time
@@ -100,7 +99,6 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
    {
       feedRate     = min( t_feedRate, maxFeedRate );  // constrain
       uint16_t tps = uint16_t( stepperConstant * feedRate );
-      //Serial.print(feedRate); Serial.print("\t"); Serial.println(tps);
 
       noInterrupts();
       if( moveDirection != positive ) // only set when a direction change happens, saves time

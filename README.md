@@ -7,6 +7,7 @@ Simple Dithering Stepper Driver Library
 * Works with almost any stepper driver that accepts step and direction input (see: stepStick)
 * Handles setup and control of hardware pins
 * Position estimation to the sub-microstep resolution minimizes discrete noise
+* Frequent setSpeed updates will not cause stuttering or motion artifacts
 * Acceleration ramping and path planning are not performed by this library ( see `EasyMove` for basic 3 axis motion control )
 
 ## Basic Usage Documentation
