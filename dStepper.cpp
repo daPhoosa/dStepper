@@ -85,7 +85,6 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
    {
       feedRate     = max( t_feedRate, -maxFeedRate );  // constrain
       uint16_t tps = uint16_t( stepperConstant * -feedRate );
-      //Serial.print(feedRate); Serial.print("\t"); Serial.println(tps);
 
       noInterrupts();
       if( moveDirection != negative ) // only set when a direction change happens, saves time
@@ -100,7 +99,6 @@ void dStepper::setSpeed(float t_feedRate)    // pass in speed [mm/s]
    {
       feedRate     = min( t_feedRate, maxFeedRate );  // constrain
       uint16_t tps = uint16_t( stepperConstant * feedRate );
-      //Serial.print(feedRate); Serial.print("\t"); Serial.println(tps);
 
       noInterrupts();
       if( moveDirection != positive ) // only set when a direction change happens, saves time
@@ -139,16 +137,7 @@ void dStepper::setPositionMM( float posFloat )
 
    posFloat *= stepsPerMM; // convert to steps
 
-   int32_t posInt;      // whole steps
-   if( posFloat < 0.0f ) // deal with decimal truncation
-   {
-     posInt = (posFloat - 0.5f);
-   }
-   else
-   {
-     posInt = (posFloat + 0.5f);
-   }
-
+   int32_t posInt  = round(posFloat); // whole steps ( use round to deal with decimal truncation)
    int16_t posFrac = (posFloat - float(posInt)) * MAX_INT_16; // fractional step
 
    noInterrupts();

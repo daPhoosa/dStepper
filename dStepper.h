@@ -63,8 +63,7 @@
          uint32_t lastUpdateTime;
          float targetPosPrev;
 
-         volatile int16_t ticksPerStep;
-         volatile int16_t tickCounter;
+         volatile int16_t ticksPerStep, tickCounter;
 
          volatile int32_t position;
 
