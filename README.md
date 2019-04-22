@@ -4,11 +4,12 @@ Simple Dithering Stepper Driver Library
 * Designed for interupt driven stepping
 * Pulse dithering for more accurate speed control and smoother high speed operation
 * Efficient functions will perform well with either 8 bit or 32 bit microcontrollers
-* Works with almost any stepper driver that accepts step and direction input (see: stepStick)
+* Works with any stepper driver that accepts step and direction input (see: stepStick)
 * Handles setup and control of hardware pins
 * Position estimation to the sub-microstep resolution minimizes discrete noise
 * Frequent setSpeed updates will not cause stuttering or motion artifacts
 * Acceleration ramping and path planning are not performed by this library ( see `EasyMove` for basic 3 axis motion control )
+* Designed to be compatible with any micro controller that is either part of or "friendly" with the Arduino ecosystem.  Specifically tested with Arduno Uno, Arduino Due, and Teensy 3.x devices.
 
 ## Basic Usage Documentation
 
@@ -22,6 +23,20 @@ dStepper your_motor( stepsPerMM, direction, tickRateHz, stepPin, directionPin, e
 * stepPin -- which hardware pin is used to send the step pulse
 * directionPin -- which hardware pin is used to send the direction signal
 * enablePin -- which hardware pin us used to enable/disable the stepper driver
+
+
+### Sending Step Pulses
+```
+your_motor.step();
+```
+* This should be called at a fixed frequency.  Generally higher frequencies will give smoother motion and high max speeds.
+* The call rate should match the rate specified at object creation (tickRateHz)
+* A step is only output when needed.  If the speed is set to zero, no pulses will be sent.
+* This should be run from an interrupt for best performance.  For the less experienced user, a library that can make this easier is: FrequencyTimer2 https://github.com/PaulStoffregen/FrequencyTimer2
+* Jitter from imperfect call rates will not cause adverse software function but may affect motor function/smoothness
+* This has low computational requrements, so high call rates should be attainable in most micro controllers
+* The step pin is set low one call after it is set high to insure that the stepper driver does not miss a step pulse at high frequencies.  This is generally only a consideration for 32bit microcontrollers operating at high frequencies, but this strategy has no disadvantages for low power micros like the Arduino.
+
 
 ### Enable/Disable Stepper
 ```
@@ -67,14 +82,11 @@ int32_t position = your_motor.getPositionSteps();
 * Steps are return as an signed 32 bit int
 
 
-### Sending Step Pulses
+### Get Maxiumum Speed
 ```
-your_motor.step();
+float speedLimit = getMaxFeedRate();
 ```
-* A step is only output when needed.  If the speed is set to zero, no pulses will be sent.
-* This should be run from an interrupt for best performance.  For the less experienced user, a library that can make this easier is: FrequencyTimer2 https://github.com/PaulStoffregen/FrequencyTimer2
-* The call rate should match the rate specified at object creation (tickRateHz)
-* Jitter from imperfect call rates will not cause adverse software function but may affect motor function/smoothness
-* This has very low computational requrement.
-
+* This function returns the maximum theoretical speed of the motor taking into account the tick rate and steps per MM.
+* Calls to setSpeed that are higher than this limit will automatically be constrained.
+* It is possible that many motors do not have the torque required to reach this max speed, so testing should be performed to establish the real limits of the system.
 

@@ -199,6 +199,12 @@ float dStepper::getSpeed() // return velocity in mm/s
 }
 
 
+float getMaxFeedRate()
+{
+   return maxFeedRate;
+}
+
+
 void dStepper::enable()
 {
    digitalWrite(enablePin, LOW);

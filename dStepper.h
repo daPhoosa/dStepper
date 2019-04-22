@@ -41,6 +41,7 @@
          float getPositionMM();
          int32_t getPositionSteps();
          float getSpeed();
+         float getMaxFeedRate();
 
          void enable();
          void disable();
