@@ -199,7 +199,7 @@ float dStepper::getSpeed() // return velocity in mm/s
 }
 
 
-float getMaxFeedRate()
+float dStepper::getMaxFeedRate()
 {
    return maxFeedRate;
 }
